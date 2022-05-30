@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net;
 using System.Web.Http;
+using System.Web;
 
 namespace Demo_NhaDat24h.Controllers
 {
@@ -17,8 +18,9 @@ namespace Demo_NhaDat24h.Controllers
         [Route("google-api")]
         public string Get(string q)
         {
-            var results = Suggests(q);
-            return results;
+            var user_ip = GetUserIP();
+            //var results = Suggests(q);
+            return user_ip;
         }
         static string Suggests(string q)
         {
@@ -34,7 +36,23 @@ namespace Demo_NhaDat24h.Controllers
             var reader = new StreamReader(webStream);
             var data = reader.ReadToEnd();
             return data;
+        }
 
+        private string GetUserIP()
+        {
+            System.Web.HttpContext context = System.Web.HttpContext.Current;
+            string ipAddress = context.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+            if (!string.IsNullOrEmpty(ipAddress))
+            {
+                string[] addresses = ipAddress.Split(',');
+                if (addresses.Length != 0)
+                {
+                    return addresses[0];
+                }
+            }
+
+            return context.Request.ServerVariables["REMOTE_ADDR"];
         }
     }
 }
